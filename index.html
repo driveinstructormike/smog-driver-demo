@@ -55,40 +55,109 @@
     box-shadow:0 12px 40px #000;
   }
 
-  /* The entire driver's-eye scene moves during the mirror / shoulder checks. */
+  /* The scene acts like a camera.  Each stage deliberately
+     zooms toward the driver's intended point of attention. */
   .scene{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
-    transform:translateX(0) rotateY(0deg) scale(1);
+    transform:translate3d(0,0,0) rotateY(0deg) scale(1);
     transform-origin:center center;
-    transition:transform 850ms cubic-bezier(.22,.7,.25,1);
+    transition:transform 1100ms cubic-bezier(.18,.72,.2,1);
     perspective:900px;
+    will-change:transform;
   }
 
+  /* LEFT sequence:
+     1) Big zoom into rearview
+     2) Pan/zoom into left mirror
+     3) Strong leftward camera move to simulate the head turning
+        approximately 120° over the left shoulder. */
   .scene.left-rearview{
-    transform:translateX(2%) rotateY(-1deg) scale(1.015);
+    transform:translate3d(4%,8%,0) rotateY(-3deg) scale(2.35);
+    transform-origin:50% 11%;
   }
 
   .scene.left-side{
-    transform:translateX(-6%) rotateY(-3deg) scale(1.035);
+    transform:translate3d(31%,2%,0) rotateY(-8deg) scale(2.45);
+    transform-origin:7% 43%;
   }
 
   .scene.left-shoulder{
-    transform:translateX(-16%) rotateY(-8deg) scale(1.08);
+    transform:translate3d(72%,0,0) rotateY(-16deg) scale(2.7);
+    transform-origin:0% 48%;
   }
 
+  /* RIGHT sequence mirrors the same camera movement. */
   .scene.right-rearview{
-    transform:translateX(-2%) rotateY(1deg) scale(1.015);
+    transform:translate3d(-4%,8%,0) rotateY(3deg) scale(2.35);
+    transform-origin:50% 11%;
   }
 
   .scene.right-side{
-    transform:translateX(6%) rotateY(3deg) scale(1.035);
+    transform:translate3d(-31%,2%,0) rotateY(8deg) scale(2.45);
+    transform-origin:93% 43%;
   }
 
   .scene.right-shoulder{
-    transform:translateX(16%) rotateY(8deg) scale(1.08);
+    transform:translate3d(-72%,0,0) rotateY(16deg) scale(2.7);
+    transform-origin:100% 48%;
+  }
+
+
+  /* Attention cue: a soft focus ring follows the camera's current target. */
+  .scene::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:16%;
+    aspect-ratio:1;
+    border:3px solid rgba(255,212,0,.9);
+    border-radius:50%;
+    box-shadow:0 0 0 9999px rgba(0,0,0,0);
+    transform:translate(-50%,-50%) scale(.45);
+    opacity:0;
+    pointer-events:none;
+    z-index:50;
+    transition:all 700ms ease;
+  }
+
+  .scene.left-rearview::after,
+  .scene.right-rearview::after{
+    left:50%;
+    top:11%;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.8);
+  }
+
+  .scene.left-side::after{
+    left:7%;
+    top:43%;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.75);
+  }
+
+  .scene.right-side::after{
+    left:93%;
+    top:43%;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.75);
+  }
+
+  .scene.left-shoulder::after{
+    left:2%;
+    top:48%;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.95);
+  }
+
+  .scene.right-shoulder::after{
+    left:98%;
+    top:48%;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.95);
   }
 
   .sky{
@@ -299,78 +368,6 @@
   .dash-light.left{left:10%}
   .dash-light.right{right:10%}
 
-  /* Steering wheel */
-  .wheel{
-    position:absolute;
-    left:50%;
-    bottom:-4%;
-    width:31%;
-    aspect-ratio:1;
-    transform:translateX(-50%);
-    border:22px solid #171717;
-    border-radius:50%;
-    z-index:20;
-    box-shadow:inset 0 0 0 5px #333,0 -4px 10px #000;
-  }
-
-  .wheel:before,
-  .wheel:after{
-    content:"";
-    position:absolute;
-    background:#171717;
-    border-radius:8px;
-  }
-
-  .wheel:before{
-    width:12%;
-    height:55%;
-    left:44%;
-    top:25%;
-  }
-
-  .wheel:after{
-    width:55%;
-    height:12%;
-    left:22%;
-    top:44%;
-  }
-
-  .hub{
-    position:absolute;
-    width:28%;
-    height:28%;
-    left:36%;
-    top:36%;
-    border-radius:50%;
-    background:#292929;
-    border:5px solid #111;
-  }
-
-  /* Turn signal stalk */
-  .stalk{
-    position:absolute;
-    left:34%;
-    bottom:36%;
-    width:22%;
-    height:14px;
-    background:#111;
-    border-radius:10px;
-    transform:rotate(-7deg);
-    transform-origin:right center;
-    z-index:25;
-  }
-
-  .stalk-tip{
-    position:absolute;
-    left:-20px;
-    top:-5px;
-    width:58px;
-    height:24px;
-    border-radius:12px;
-    background:#222;
-    border:2px solid #444;
-  }
-
   /* Controls */
   .controls{
     margin:12px auto 0;
@@ -431,7 +428,6 @@
 
   @media (max-width:600px){
     .viewport{border-width:2px}
-    .wheel{border-width:13px}
     .rearview{border-width:3px}
     .side-mirror{border-width:3px}
     button{padding:9px 14px;font-size:14px}
@@ -442,8 +438,8 @@
 <body>
   <h1>S.M.O.G. — Driver's Seat Demonstration</h1>
   <p class="instructions">
-    Activate a turn signal, then watch the driver's view move through
-    <strong>Mirror → Side Mirror → Over the Shoulder</strong>.
+    Activate a turn signal, then watch the driver's view make a clear
+    <strong>rearview → side mirror → over-the-shoulder</strong> scan.
   </p>
 
   <main class="sim-wrap">
@@ -486,16 +482,6 @@
             <div class="dash-light left"></div>
             <div class="dash-light right"></div>
           </div>
-        </div>
-
-        <!-- Steering wheel -->
-        <div class="wheel">
-          <div class="hub"></div>
-        </div>
-
-        <!-- Turn signal lever -->
-        <div class="stalk">
-          <div class="stalk-tip"></div>
         </div>
 
       </div>
@@ -541,17 +527,17 @@
       {
         className: "left-rearview",
         status: "LEFT SIGNAL — CHECK REARVIEW MIRROR",
-        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+        step: "1. SIGNAL → 2. EYES TO REARVIEW MIRROR"
       },
       {
         className: "left-side",
         status: "LEFT — CHECK LEFT SIDE MIRROR",
-        step: "3. Check LEFT SIDE mirror"
+        step: "3. EYES PAN TO LEFT SIDE MIRROR"
       },
       {
         className: "left-shoulder",
         status: "LEFT — LOOK OVER LEFT SHOULDER",
-        step: "4. Look OVER LEFT SHOULDER"
+        step: "4. TURN HEAD ~120° OVER LEFT SHOULDER"
       }
     ],
 
@@ -559,17 +545,17 @@
       {
         className: "right-rearview",
         status: "RIGHT SIGNAL — CHECK REARVIEW MIRROR",
-        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+        step: "1. SIGNAL → 2. EYES TO REARVIEW MIRROR"
       },
       {
         className: "right-side",
         status: "RIGHT — CHECK RIGHT SIDE MIRROR",
-        step: "3. Check RIGHT SIDE mirror"
+        step: "3. EYES PAN TO RIGHT SIDE MIRROR"
       },
       {
         className: "right-shoulder",
         status: "RIGHT — LOOK OVER RIGHT SHOULDER",
-        step: "4. Look OVER RIGHT SHOULDER"
+        step: "4. TURN HEAD ~120° OVER RIGHT SHOULDER"
       }
     ]
   };
@@ -635,7 +621,7 @@
         Each movement stays on screen long enough for a student
         to see where the driver's attention should go.
       */
-      sequenceTimer = setTimeout(showNext, 1800);
+      sequenceTimer = setTimeout(showNext, 2200);
     }
 
     showNext();
