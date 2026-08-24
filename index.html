@@ -16,281 +16,354 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            user-select: none;
         }
 
         h1 {
+            color: #f39c12;
             margin-bottom: 5px;
-            color: #f1c40f;
         }
 
         .subtitle {
-            margin-bottom: 25px;
-            color: #cccccc;
+            font-size: 1.1em;
+            margin-bottom: 20px;
             text-align: center;
+            max-width: 600px;
         }
 
-        /* Viewport Container */
-        .demo-container {
+        .display-container {
             position: relative;
             width: 600px;
             height: 350px;
             background-color: #2c3e50;
             border: 4px solid #34495e;
-            border-radius: 8px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            box-sizing: border-box;
             overflow: hidden;
+        }
+
+        .mirror-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            height: 100px;
+        }
+
+        .mirror {
+            flex: 1;
+            background-color: #34495e;
+            border: 2px solid #7f8c8d;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #bdc3c7;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 5px;
         }
 
-        /* Views Styles */
-        .view-panel {
+        .center-mirror {
+            flex: 1.5;
+            height: 70px;
+            margin: 0 auto;
+            border-radius: 20px;
+        }
+
+        .view-screen {
+            flex: 1;
+            margin-top: 15px;
+            background-color: #111;
+            border: 2px solid #555;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: #f1c40f;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+
+        /* Active highlight states */
+        .mirror.active {
+            border-color: #f1c40f;
+            background-color: #2980b9;
+            color: #fff;
+            box-shadow: 0 0 15px #f1c40f;
+        }
+
+        /* Flashing Indicator Overlays */
+        .flash-overlay {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none;
-        }
-
-        .view-panel.active {
-            opacity: 1;
-        }
-
-        #default-view { background-color: #34495e; }
-        #rearview-view { background-color: #2980b9; }
-        #sidemirror-view { background-color: #8e44ad; }
-        #shoulder-view { background-color: #27ae60; }
-
-        /* Large Flashing Arrow Indicator */
-        .flash-indicator {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-top: 60px solid transparent;
-            border-bottom: 60px solid transparent;
-            opacity: 0;
+            background-color: rgba(0,0,0,0.4);
             z-index: 10;
             pointer-events: none;
         }
 
-        .flash-indicator.left-arrow {
-            border-right: 100px solid #f1c40f;
-            left: 250px;
+        .triangle {
+            width: 0;
+            height: 0;
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+            display: none;
         }
 
-        .flash-indicator.right-arrow {
+        .triangle.left {
+            border-right: 100px solid #f1c40f;
+        }
+
+        .triangle.right {
             border-left: 100px solid #f1c40f;
-            right: 250px;
+        }
+
+        .flashing {
+            animation: flash-animation 0.4s infinite alternate;
         }
 
         @keyframes flash-animation {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
+            0% { opacity: 0.1; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.05); }
         }
 
-        .flash-indicator.flashing {
-            animation: flash-animation 0.4s ease-in-out 3; /* Flashes 3 times (1.2s total) */
-        }
-
-        /* Controls */
+        /* Controls styling */
         .controls {
+            margin-top: 25px;
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
         }
 
         button {
-            background-color: #34495e;
+            background-color: #2980b9;
             color: white;
             border: none;
             padding: 12px 24px;
-            font-size: 16px;
+            font-size: 1em;
             font-weight: bold;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s;
         }
 
         button:hover {
-            background-color: #455a64;
+            background-color: #3498db;
         }
 
-        button:active {
-            transform: scale(0.98);
+        button.reset {
+            background-color: #c0392b;
         }
 
-        button#left-btn { border-left: 5px solid #f1c40f; }
-        button#right-btn { border-right: 5px solid #f1c40f; }
-        button#reset-btn { background-color: #c0392b; }
-        button#reset-btn:hover { background-color: #e74c3c; }
+        button.reset:hover {
+            background-color: #e74c3c;
+        }
 
         button:disabled {
-            background-color: #222222;
-            color: #555555;
+            background-color: #7f8c8d;
             cursor: not-allowed;
-            border-color: #333333 !important;
         }
 
-        .instructions {
-            font-size: 14px;
-            color: #888888;
-            text-align: center;
+        .status-text {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #f1c40f;
+            min-height: 1.5em;
+        }
+
+        .keyboard-help {
+            margin-top: 20px;
+            font-size: 0.85em;
+            color: #aaa;
         }
         
-        .status-text {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f1c40f;
-            margin-bottom: 15px;
-            height: 24px;
+        .keyboard-help border {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #555;
         }
     </style>
 </head>
 <body>
 
     <h1>S.M.O.G. — Driver's Seat Demonstration</h1>
-    <div class="subtitle">Activate a turn signal, then watch the driver's view make a clear rearview &rarr; side mirror &rarr; over-the-shoulder scan.</div>
+    <div class="subtitle">Activate a turn signal, then watch the driver's view make a clear <strong>rearview &rarr; side mirror &rarr; over-the-shoulder</strong> scan.</div>
 
-    <div class="status-text" id="status-display">Ready — choose LEFT or RIGHT.</div>
+    <div class="display-container">
+        <!-- Flashing Indicator Layer -->
+        <div class="flash-overlay" id="flashOverlay">
+            <div class="triangle left" id="leftTriangle"></div>
+            <div class="triangle right" id="rightTriangle"></div>
+        </div>
 
-    <div class="demo-container">
-        <!-- Flashing Triangles -->
-        <div id="left-flash" class="flash-indicator left-arrow"></div>
-        <div id="right-flash" class="flash-indicator right-arrow"></div>
+        <!-- Upper Mirror Row -->
+        <div class="mirror-row">
+            <div class="mirror" id="leftMirror">LEFT MIRROR</div>
+            <div class="mirror center-mirror" id="rearviewMirror">REARVIEW MIRROR</div>
+            <div class="mirror" id="rightMirror">RIGHT MIRROR</div>
+        </div>
 
-        <!-- Panels -->
-        <div id="default-view" class="view-panel active">FORWARD VIEW</div>
-        <div id="rearview-view" class="view-panel">REARVIEW MIRROR</div>
-        <div id="sidemirror-view" class="view-panel">SIDE MIRROR</div>
-        <div id="shoulder-view" class="view-panel">OVER-THE-SHOULDER VIEW</div>
+        <!-- Main Lower Feedback Screen -->
+        <div class="view-screen" id="viewScreen">
+            Ready &mdash; choose LEFT or RIGHT.
+        </div>
     </div>
 
     <div class="controls">
-        <button id="left-btn" onclick="startSequence('LEFT')">&#9664; LEFT SIGNAL</button>
-        <button id="right-btn" onclick="startSequence('RIGHT')">RIGHT SIGNAL &#9654;</button>
-        <button id="reset-btn" onclick="resetDemo()">RESET</button>
+        <button id="btnLeft">&lt;&lt; LEFT SIGNAL</button>
+        <button id="btnRight">RIGHT SIGNAL &gt;&gt;</button>
+        <button id="btnReset" class="reset">RESET</button>
     </div>
 
-    <div class="instructions">
-        Keyboard: <strong>&larr;</strong> Left Signal | <strong>&rarr;</strong> Right Signal | <strong>Space</strong> Reset
+    <div class="status-text" id="statusText">S.M.O.G. sequence will begin with the signal.</div>
+
+    <div class="keyboard-help">
+        Keyboard: <kbd>&larr;</kbd> Left Signal | <kbd>&rarr;</kbd> Right Signal | <kbd>Space</kbd> Reset
     </div>
 
     <script>
+        const leftMirror = document.getElementById('leftMirror');
+        const rearviewMirror = document.getElementById('rearviewMirror');
+        const rightMirror = document.getElementById('rightMirror');
+        const viewScreen = document.getElementById('viewScreen');
+        const statusText = document.getElementById('statusText');
+        
+        const flashOverlay = document.getElementById('flashOverlay');
+        const leftTriangle = document.getElementById('leftTriangle');
+        const rightTriangle = document.getElementById('rightTriangle');
+
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+        const btnReset = document.getElementById('btnReset');
+
         let isRunning = false;
         let timeouts = [];
 
-        const statusDisplay = document.getElementById('status-display');
-        const leftBtn = document.getElementById('left-btn');
-        const rightBtn = document.getElementById('right-btn');
-        const leftFlash = document.getElementById('left-flash');
-        const rightFlash = document.getElementById('right-flash');
-        
-        const panels = {
-            default: document.getElementById('default-view'),
-            rearview: document.getElementById('rearview-view'),
-            sidemirror: document.getElementById('sidemirror-view'),
-            shoulder: document.getElementById('shoulder-view')
-        };
-
-        function setPanelActive(activeKey) {
-            Object.keys(panels).forEach(key => {
-                if (key === activeKey) {
-                    panels[key].classList.add('active');
-                } else {
-                    panels[key].classList.remove('active');
-                }
-            });
-        }
-
-        function disableControls(disable) {
-            leftBtn.disabled = disable;
-            rightBtn.disabled = disable;
-            isRunning = disable;
-        }
-
-        function startSequence(direction) {
-            if (isRunning) return;
-            disableControls(true);
-            clearTimeouts();
-
-            const flashTarget = direction === 'LEFT' ? leftFlash : rightFlash;
-            const sideText = direction === 'LEFT' ? 'LEFT MIRROR' : 'RIGHT MIRROR';
-            const shoulderText = direction === 'LEFT' ? 'LEFT OVER-THE-SHOULDER' : 'RIGHT OVER-THE-SHOULDER';
-
-            // Dynamic text updates for directions
-            panels.sidemirror.textContent = sideText;
-            panels.shoulder.textContent = shoulderText;
-
-            // Step 1: Flashing Triangle
-            statusDisplay.textContent = `Signaling ${direction}...`;
-            flashTarget.classList.add('flashing');
-
-            // Wait for 3 flashes to finish (0.4s * 3 = 1200ms)
-            queueTimeout(() => {
-                flashTarget.classList.remove('flashing');
-                
-                // Step 2: Rearview Mirror (Duration: 1.5s)
-                statusDisplay.textContent = "Scanning REARVIEW MIRROR...";
-                setPanelActive('rearview');
-
-                queueTimeout(() => {
-                    // Step 3: Side Mirror (Duration: 1.5s)
-                    statusDisplay.textContent = `Scanning ${sideText}...`;
-                    setPanelActive('sidemirror');
-
-                    queueTimeout(() => {
-                        // Step 4: Over-the-shoulder (Duration: 1.5s)
-                        statusDisplay.textContent = `Checking ${shoulderText}...`;
-                        setPanelActive('shoulder');
-
-                        queueTimeout(() => {
-                            // Sequence Complete
-                            statusDisplay.textContent = "Scan complete. Safe to change lanes.";
-                            disableControls(false);
-                        }, 1500);
-
-                    }, 1500);
-
-                }, 1500);
-
-            }, 1200);
-        }
-
-        function queueTimeout(callback, delay) {
-            const t = setTimeout(callback, delay);
-            timeouts.push(t);
-        }
-
-        function clearTimeouts() {
+        function clearAllTimeouts() {
             timeouts.forEach(t => clearTimeout(t));
             timeouts = [];
         }
 
         function resetDemo() {
-            clearTimeouts();
-            leftFlash.classList.remove('flashing');
-            rightFlash.classList.remove('flashing');
-            setPanelActive('default');
-            statusDisplay.textContent = "Ready — choose LEFT or RIGHT.";
-            disableControls(false);
+            clearAllTimeouts();
+            isRunning = false;
+
+            // Reset UI states
+            leftMirror.classList.remove('active');
+            rearviewMirror.classList.remove('active');
+            rightMirror.classList.remove('active');
+            
+            // Hide indicators
+            flashOverlay.style.display = 'none';
+            leftTriangle.classList.remove('flashing');
+            leftTriangle.style.display = 'none';
+            rightTriangle.classList.remove('flashing');
+            rightTriangle.style.display = 'none';
+
+            // Reset texts
+            viewScreen.textContent = "Ready — choose LEFT or RIGHT.";
+            statusText.textContent = "S.M.O.G. sequence will begin with the signal.";
+
+            // Re-enable buttons
+            btnLeft.disabled = false;
+            btnRight.disabled = false;
         }
 
-        // Keyboard Handlers
+        function startSequence(direction) {
+            if (isRunning) return;
+            isRunning = true;
+
+            btnLeft.disabled = true;
+            btnRight.disabled = true;
+
+            // Step 1: Trigger the flashing triangle overlay first
+            flashOverlay.style.display = 'flex';
+            statusText.textContent = `Signaling ${direction.toUpperCase()}...`;
+            viewScreen.textContent = `[SIGNAL ACTIVE]`;
+
+            if (direction === 'left') {
+                leftTriangle.style.display = 'block';
+                leftTriangle.classList.add('flashing');
+            } else {
+                rightTriangle.style.display = 'block';
+                rightTriangle.classList.add('flashing');
+            }
+
+            // Let it flash for 1.6 seconds (approx 4 rapid cycles)
+            const flashDuration = 1600;
+
+            let t1 = setTimeout(() => {
+                // Deactivate the flashing indicators completely
+                flashOverlay.style.display = 'none';
+                leftTriangle.classList.remove('flashing');
+                leftTriangle.style.display = 'none';
+                rightTriangle.classList.remove('flashing');
+                rightTriangle.style.display = 'none';
+
+                // Step 2: Begin Rearview Mirror Scan
+                rearviewMirror.classList.add('active');
+                viewScreen.textContent = "Checking Rearview Mirror...";
+                statusText.textContent = "S.M.O.G. Step 1: Rearview Mirror Scan";
+            }, flashDuration);
+            timeouts.push(t1);
+
+            // Step 3: Side Mirror Scan
+            let t2 = setTimeout(() => {
+                rearviewMirror.classList.remove('active');
+                if (direction === 'left') {
+                    leftMirror.classList.add('active');
+                    viewScreen.textContent = "Checking Left Side Mirror...";
+                    statusText.textContent = "S.M.O.G. Step 2: Left Side Mirror Scan";
+                } else {
+                    rightMirror.classList.add('active');
+                    viewScreen.textContent = "Checking Right Side Mirror...";
+                    statusText.textContent = "S.M.O.G. Step 2: Right Side Mirror Scan";
+                }
+            }, flashDuration + 1500);
+            timeouts.push(t2);
+
+            // Step 4: Over-the-shoulder look
+            let t3 = setTimeout(() => {
+                leftMirror.classList.remove('active');
+                rightMirror.classList.remove('active');
+                
+                viewScreen.textContent = `Looking Over ${direction.toUpperCase()} Shoulder!`;
+                statusText.textContent = `S.M.O.G. Step 3: Over-the-Shoulder Blind Spot Check`;
+            }, flashDuration + 3000);
+            timeouts.push(t3);
+
+            // Complete state
+            let t4 = setTimeout(() => {
+                viewScreen.textContent = "Scan Complete. Safe to Merge.";
+                statusText.textContent = "Sequence complete. Click RESET to retry.";
+            }, flashDuration + 4500);
+            timeouts.push(t4);
+        }
+
+        // Button Event Listeners
+        btnLeft.addEventListener('click', () => startSequence('left'));
+        btnRight.addEventListener('click', () => startSequence('right'));
+        btnReset.addEventListener('click', resetDemo);
+
+        // Keyboard Navigation Support
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
-                startSequence('LEFT');
+                startSequence('left');
             } else if (e.key === 'ArrowRight') {
-                startSequence('RIGHT');
+                startSequence('right');
             } else if (e.key === ' ' || e.key === 'Spacebar') {
-                e.preventDefault();
+                e.preventDefault(); // Stop page scrolling down
                 resetDemo();
             }
         });
