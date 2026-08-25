@@ -1,372 +1,656 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.M.O.G. Driver View Demo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.M.O.G. Driver View Demo</title>
+<style>
+  :root{
+    --bg:#111;
+    --panel:#1d1d1d;
+    --accent:#ffd400;
+    --signal:#ff9d00;
+    --glass:#9ed8f5;
+  }
 
-        h1 {
-            color: #f39c12;
-            margin-bottom: 5px;
-        }
+  *{box-sizing:border-box}
 
-        .subtitle {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            text-align: center;
-            max-width: 600px;
-        }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:#090909;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+  }
 
-        .display-container {
-            position: relative;
-            width: 600px;
-            height: 350px;
-            background-color: #2c3e50;
-            border: 4px solid #34495e;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 15px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+  h1{
+    margin:12px 0 8px;
+    font-size:clamp(20px,3vw,32px);
+    text-align:center;
+  }
 
-        .mirror-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            height: 100px;
-        }
+  .instructions{
+    margin:0 12px 12px;
+    color:#ccc;
+    text-align:center;
+    font-size:14px;
+  }
 
-        .mirror {
-            flex: 1;
-            background-color: #34495e;
-            border: 2px solid #7f8c8d;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9em;
-            color: #bdc3c7;
-            transition: all 0.3s ease;
-            text-align: center;
-            padding: 5px;
-        }
+  .sim-wrap{
+    width:min(960px,96vw);
+  }
 
-        .center-mirror {
-            flex: 1.5;
-            height: 70px;
-            margin: 0 auto;
-            border-radius: 20px;
-        }
+  .viewport{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    border:3px solid #333;
+    border-radius:12px;
+    background:#66727b;
+    box-shadow:0 12px 40px #000;
+  }
 
-        .view-screen {
-            flex: 1;
-            margin-top: 15px;
-            background-color: #111;
-            border: 2px solid #555;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            color: #f1c40f;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
-        }
+  /* The entire driver's-eye scene moves during the mirror / shoulder checks. */
+  .scene{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    transform:translateX(0) rotateY(0deg) scale(1);
+    transform-origin:center center;
+    transition:transform 1200ms cubic-bezier(.18,.78,.2,1);
+    perspective:900px;
+  }
 
-        /* Active highlight states */
-        .mirror.active {
-            border-color: #f1c40f;
-            background-color: #2980b9;
-            color: #fff;
-            box-shadow: 0 0 15px #f1c40f;
-        }
+  .scene.left-rearview{ transform:translateX(8%) scale(1.85) rotateY(-2deg); }
+  .scene.left-side{ transform:translateX(-15%) scale(2.15) rotateY(-5deg); }
+  .scene.left-shoulder{ transform:translateX(-42%) scale(2.65) rotateY(-20deg); }
+  .scene.right-rearview{ transform:translateX(-8%) scale(1.85) rotateY(2deg); }
+  .scene.right-side{ transform:translateX(15%) scale(2.15) rotateY(5deg); }
+  .scene.right-shoulder{ transform:translateX(43%) scale(2.75) rotateY(22deg); }
 
-        /* Flashing Indicator Overlays */
-        .flash-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0,0,0,0.4);
-            z-index: 10;
-            pointer-events: none;
-        }
+  .sky{
+    position:absolute;
+    inset:0 0 42% 0;
+    background:linear-gradient(#8bc6ec 0%,#cde8f6 65%,#eef7fa 100%);
+  }
 
-        .triangle {
-            width: 0;
-            height: 0;
-            border-top: 60px solid transparent;
-            border-bottom: 60px solid transparent;
-            display: none;
-        }
+  .road{
+    position:absolute;
+    left:-15%;
+    right:-15%;
+    bottom:-20%;
+    height:66%;
+    background:#41464b;
+    clip-path:polygon(30% 0,70% 0,100% 100%,0 100%);
+  }
 
-        .triangle.left {
-            border-right: 100px solid #f1c40f;
-        }
+  .road:before,
+  .road:after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:8px;
+    background:#eee;
+  }
 
-        .triangle.right {
-            border-left: 100px solid #f1c40f;
-        }
+  .road:before{left:29%}
+  .road:after{right:29%}
 
-        .flashing {
-            animation: flash-animation 0.4s infinite alternate;
-        }
+  .lane-line{
+    position:absolute;
+    left:50%;
+    top:5%;
+    bottom:-5%;
+    width:7px;
+    transform:translateX(-50%);
+    background:repeating-linear-gradient(
+      to bottom,
+      transparent 0 50px,
+      #ddd 50px 85px
+    );
+  }
 
-        @keyframes flash-animation {
-            0% { opacity: 0.1; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1.05); }
-        }
+  .horizon{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:42%;
+    height:12%;
+    background:linear-gradient(
+      to bottom,
+      #63856a 0 55%,
+      #4c704f 55% 100%
+    );
+  }
 
-        /* Controls styling */
-        .controls {
-            margin-top: 25px;
-            display: flex;
-            gap: 15px;
-        }
+  .tree{
+    position:absolute;
+    bottom:44%;
+    width:80px;
+    height:125px;
+  }
 
-        button {
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1em;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+  .tree:before{
+    content:"";
+    position:absolute;
+    left:34px;
+    bottom:0;
+    width:12px;
+    height:62px;
+    background:#5c4030;
+  }
 
-        button:hover {
-            background-color: #3498db;
-        }
+  .tree:after{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:#315d38;
+    box-shadow:35px 25px 0 #3e7145,-25px 28px 0 #386842;
+  }
 
-        button.reset {
-            background-color: #c0392b;
-        }
+  .tree.left{left:5%;transform:scale(.75)}
+  .tree.left2{left:23%;transform:scale(.5)}
+  .tree.right{right:5%;transform:scale(.8)}
+  .tree.right2{right:24%;transform:scale(.52)}
 
-        button.reset:hover {
-            background-color: #e74c3c;
-        }
+  /* Rearview mirror */
+  .rearview{
+    position:absolute;
+    left:50%;
+    top:5%;
+    width:27%;
+    height:11%;
+    transform:translateX(-50%);
+    background:#151515;
+    border-radius:18px;
+    border:5px solid #252525;
+    box-shadow:0 5px 8px #0008;
+    z-index:10;
+  }
 
-        button:disabled {
-            background-color: #7f8c8d;
-            cursor: not-allowed;
-        }
+  .rearview .glass{
+    position:absolute;
+    inset:8%;
+    border-radius:10px;
+    background:linear-gradient(#b7dff1,#7798a7);
+    overflow:hidden;
+  }
 
-        .status-text {
-            margin-top: 15px;
-            font-size: 1.2em;
-            color: #f1c40f;
-            min-height: 1.5em;
-        }
+  .rearview .glass:after{
+    content:"";
+    position:absolute;
+    left:42%;
+    top:0;
+    bottom:0;
+    width:18%;
+    background:#456048;
+    clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);
+    opacity:.65;
+  }
 
-        .keyboard-help {
-            margin-top: 20px;
-            font-size: 0.85em;
-            color: #aaa;
-        }
-        
-        .keyboard-help border {
-            background: #333;
-            padding: 2px 6px;
-            border-radius: 3px;
-            border: 1px solid #555;
-        }
-    </style>
+  .rearview .label,
+  .side-mirror .label{
+    position:absolute;
+    width:100%;
+    text-align:center;
+    top:100%;
+    margin-top:4px;
+    color:#fff;
+    font-size:11px;
+    text-shadow:0 1px 2px #000;
+    font-weight:bold;
+  }
+
+  /* Side mirrors */
+  .side-mirror{
+    position:absolute;
+    top:37%;
+    width:17%;
+    height:13%;
+    background:#171717;
+    border:5px solid #252525;
+    border-radius:35% 55% 45% 40%;
+    z-index:9;
+    box-shadow:0 5px 8px #0009;
+  }
+
+  .side-mirror .glass{
+    position:absolute;
+    inset:8%;
+    border-radius:inherit;
+    background:linear-gradient(145deg,#b7dff1,#6c8998);
+  }
+
+  .left-mirror{
+    left:1%;
+    transform:rotate(-5deg);
+  }
+
+  .right-mirror{
+    right:1%;
+    transform:scaleX(-1) rotate(-5deg);
+  }
+
+  .right-mirror .label{transform:scaleX(-1)}
+
+  /* Dashboard / hood */
+  .dashboard{
+    position:absolute;
+    left:-5%;
+    right:-5%;
+    bottom:-2%;
+    height:29%;
+    background:linear-gradient(#282828,#121212);
+    border-top:5px solid #333;
+    z-index:12;
+    clip-path:polygon(0 18%,100% 18%,100% 100%,0 100%);
+  }
+
+  .dash-panel{
+    position:absolute;
+    left:50%;
+    top:25%;
+    transform:translateX(-50%);
+    width:34%;
+    height:38%;
+    background:#090909;
+    border-radius:8px;
+    border:3px solid #333;
+  }
+
+  .dash-light{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#4b4b4b;
+    top:50%;
+    transform:translateY(-50%);
+  }
+
+  .dash-light.left{left:10%}
+  .dash-light.right{right:10%}
+
+  /* Steering wheel */
+  .wheel{
+    position:absolute;
+    left:50%;
+    bottom:-4%;
+    width:31%;
+    aspect-ratio:1;
+    transform:translateX(-50%);
+    border:22px solid #171717;
+    border-radius:50%;
+    z-index:20;
+    box-shadow:inset 0 0 0 5px #333,0 -4px 10px #000;
+  }
+
+  .wheel:before,
+  .wheel:after{
+    content:"";
+    position:absolute;
+    background:#171717;
+    border-radius:8px;
+  }
+
+  .wheel:before{
+    width:12%;
+    height:55%;
+    left:44%;
+    top:25%;
+  }
+
+  .wheel:after{
+    width:55%;
+    height:12%;
+    left:22%;
+    top:44%;
+  }
+
+  .hub{
+    position:absolute;
+    width:28%;
+    height:28%;
+    left:36%;
+    top:36%;
+    border-radius:50%;
+    background:#292929;
+    border:5px solid #111;
+  }
+  .wheel-signal{position:absolute;left:50%;top:50%;width:0;height:0;transform:translate(-50%,-50%);opacity:0;filter:drop-shadow(0 0 5px #ffd400);}
+  .wheel-signal.left{border-top:12px solid transparent;border-bottom:12px solid transparent;border-right:22px solid #ffd400;}
+  .wheel-signal.right{border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:22px solid #ffd400;}
+  .wheel-signal.flash{animation:signalFlash .55s steps(1,end) infinite;}
+  @keyframes signalFlash{0%,49%{opacity:1}50%,100%{opacity:.12}}
+
+
+  /* Turn signal stalk */
+  .stalk{
+    position:absolute;
+    left:34%;
+    bottom:36%;
+    width:22%;
+    height:14px;
+    background:#111;
+    border-radius:10px;
+    transform:rotate(-7deg);
+    transform-origin:right center;
+    z-index:25;
+  }
+
+  .stalk-tip{
+    position:absolute;
+    left:-20px;
+    top:-5px;
+    width:58px;
+    height:24px;
+    border-radius:12px;
+    background:#222;
+    border:2px solid #444;
+  }
+
+  /* Controls */
+  .controls{
+    margin:12px auto 0;
+    padding:12px;
+    background:var(--panel);
+    border:1px solid #333;
+    border-radius:10px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+
+  button{
+    appearance:none;
+    border:0;
+    border-radius:7px;
+    padding:11px 20px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    color:#111;
+    background:#ddd;
+  }
+
+  button:hover{filter:brightness(1.1)}
+  button:active{transform:translateY(1px)}
+
+  .left-btn.active,
+  .right-btn.active{
+    background:var(--signal);
+  }
+
+  .reset{background:#aaa}
+
+  .status{
+    width:100%;
+    text-align:center;
+    min-height:24px;
+    font-weight:bold;
+    color:#fff;
+  }
+
+  .step{
+    width:100%;
+    text-align:center;
+    color:#ccc;
+    font-size:14px;
+  }
+
+  .key{
+    margin-top:8px;
+    color:#999;
+    font-size:12px;
+    text-align:center;
+  }
+
+  @media (max-width:600px){
+    .viewport{border-width:2px}
+    .wheel{border-width:13px}
+    .rearview{border-width:3px}
+    .side-mirror{border-width:3px}
+    button{padding:9px 14px;font-size:14px}
+  }
+</style>
 </head>
+
 <body>
+  <h1>S.M.O.G. — Driver's Seat Demonstration</h1>
+  <p class="instructions">
+    Activate a turn signal, then watch the driver's view move through
+    <strong>Mirror → Side Mirror → Over the Shoulder</strong>.
+  </p>
 
-    <h1>S.M.O.G. — Driver's Seat Demonstration</h1>
-    <div class="subtitle">Activate a turn signal, then watch the driver's view make a clear <strong>rearview &rarr; side mirror &rarr; over-the-shoulder</strong> scan.</div>
+  <main class="sim-wrap">
+    <div class="viewport" aria-label="Interactive driver's seat view">
 
-    <div class="display-container">
-        <!-- Flashing Indicator Layer -->
-        <div class="flash-overlay" id="flashOverlay">
-            <div class="triangle left" id="leftTriangle"></div>
-            <div class="triangle right" id="rightTriangle"></div>
+      <div id="scene" class="scene">
+
+        <div class="sky"></div>
+        <div class="horizon"></div>
+
+        <div class="tree left"></div>
+        <div class="tree left2"></div>
+        <div class="tree right"></div>
+        <div class="tree right2"></div>
+
+        <div class="road">
+          <div class="lane-line"></div>
         </div>
 
-        <!-- Upper Mirror Row -->
-        <div class="mirror-row">
-            <div class="mirror" id="leftMirror">LEFT MIRROR</div>
-            <div class="mirror center-mirror" id="rearviewMirror">REARVIEW MIRROR</div>
-            <div class="mirror" id="rightMirror">RIGHT MIRROR</div>
+        <!-- Center rearview mirror -->
+        <div class="rearview" id="rearview">
+          <div class="glass"></div>
+          <div class="label">REARVIEW MIRROR</div>
         </div>
 
-        <!-- Main Lower Feedback Screen -->
-        <div class="view-screen" id="viewScreen">
-            Ready &mdash; choose LEFT or RIGHT.
+        <!-- Left side mirror -->
+        <div class="side-mirror left-mirror" id="leftMirror">
+          <div class="glass"></div>
+          <div class="label">LEFT MIRROR</div>
         </div>
+
+        <!-- Right side mirror -->
+        <div class="side-mirror right-mirror" id="rightMirror">
+          <div class="glass"></div>
+          <div class="label">RIGHT MIRROR</div>
+        </div>
+
+        <div class="dashboard">
+          <div class="dash-panel">
+            <div class="dash-light left"></div>
+            <div class="dash-light right"></div>
+          </div>
+        </div>
+
+        <!-- Steering wheel -->
+        <div class="wheel">
+          <div class="hub">
+            <div id="wheelSignal" class="wheel-signal" aria-hidden="true"></div>
+          </div>
+        </div>
+
+
+      </div>
     </div>
 
     <div class="controls">
-        <button id="btnLeft">&lt;&lt; LEFT SIGNAL</button>
-        <button id="btnRight">RIGHT SIGNAL &gt;&gt;</button>
-        <button id="btnReset" class="reset">RESET</button>
+      <button id="leftBtn" class="left-btn" type="button">
+        ◀ LEFT SIGNAL
+      </button>
+
+      <button id="rightBtn" class="right-btn" type="button">
+        RIGHT SIGNAL ▶
+      </button>
+
+      <button id="resetBtn" class="reset" type="button">
+        RESET
+      </button>
+
+      <div id="status" class="status">Ready — choose LEFT or RIGHT.</div>
+      <div id="step" class="step">S.M.O.G. sequence will begin with the signal.</div>
     </div>
 
-    <div class="status-text" id="statusText">S.M.O.G. sequence will begin with the signal.</div>
-
-    <div class="keyboard-help">
-        Keyboard: <kbd>&larr;</kbd> Left Signal | <kbd>&rarr;</kbd> Right Signal | <kbd>Space</kbd> Reset
+    <div class="key">
+      Keyboard: <strong>←</strong> Left Signal &nbsp;|&nbsp;
+      <strong>→</strong> Right Signal &nbsp;|&nbsp;
+      <strong>Space</strong> Reset
     </div>
+  </main>
 
-    <script>
-        const leftMirror = document.getElementById('leftMirror');
-        const rearviewMirror = document.getElementById('rearviewMirror');
-        const rightMirror = document.getElementById('rightMirror');
-        const viewScreen = document.getElementById('viewScreen');
-        const statusText = document.getElementById('statusText');
-        
-        const flashOverlay = document.getElementById('flashOverlay');
-        const leftTriangle = document.getElementById('leftTriangle');
-        const rightTriangle = document.getElementById('rightTriangle');
+<script>
+  const scene = document.getElementById("scene");
+  const leftBtn = document.getElementById("leftBtn");
+  const rightBtn = document.getElementById("rightBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const status = document.getElementById("status");
+  const step = document.getElementById("step");
+  const wheelSignal = document.getElementById("wheelSignal");
 
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
-        const btnReset = document.getElementById('btnReset');
+  let sequenceTimer = null;
+  let currentDirection = null;
 
-        let isRunning = false;
-        let timeouts = [];
+  const sequence = {
+    left: [
+      {
+        className: "left-rearview",
+        status: "LEFT SIGNAL — CHECK REARVIEW MIRROR",
+        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+      },
+      {
+        className: "left-side",
+        status: "LEFT — CHECK LEFT SIDE MIRROR",
+        step: "3. Check LEFT SIDE mirror"
+      },
+      {
+        className: "left-shoulder",
+        status: "LEFT — LOOK OVER LEFT SHOULDER",
+        step: "4. Look OVER LEFT SHOULDER"
+      }
+    ],
 
-        function clearAllTimeouts() {
-            timeouts.forEach(t => clearTimeout(t));
-            timeouts = [];
-        }
+    right: [
+      {
+        className: "right-rearview",
+        status: "RIGHT SIGNAL — CHECK REARVIEW MIRROR",
+        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+      },
+      {
+        className: "right-side",
+        status: "RIGHT — CHECK RIGHT SIDE MIRROR",
+        step: "3. Check RIGHT SIDE mirror"
+      },
+      {
+        className: "right-shoulder",
+        status: "RIGHT — LOOK OVER RIGHT SHOULDER",
+        step: "4. Look OVER RIGHT SHOULDER"
+      }
+    ]
+  };
 
-        function resetDemo() {
-            clearAllTimeouts();
-            isRunning = false;
+  function clearSceneClasses(){
+    scene.classList.remove(
+      "left-rearview",
+      "left-side",
+      "left-shoulder",
+      "right-rearview",
+      "right-side",
+      "right-shoulder"
+    );
+  }
 
-            // Reset UI states
-            leftMirror.classList.remove('active');
-            rearviewMirror.classList.remove('active');
-            rightMirror.classList.remove('active');
-            
-            // Hide indicators
-            flashOverlay.style.display = 'none';
-            leftTriangle.classList.remove('flashing');
-            leftTriangle.style.display = 'none';
-            rightTriangle.classList.remove('flashing');
-            rightTriangle.style.display = 'none';
+  function reset(){
+    clearTimeout(sequenceTimer);
+    sequenceTimer = null;
+    currentDirection = null;
+    clearSceneClasses();
+    wheelSignal.className = "wheel-signal";
 
-            // Reset texts
-            viewScreen.textContent = "Ready — choose LEFT or RIGHT.";
-            statusText.textContent = "S.M.O.G. sequence will begin with the signal.";
+    leftBtn.classList.remove("active");
+    rightBtn.classList.remove("active");
 
-            // Re-enable buttons
-            btnLeft.disabled = false;
-            btnRight.disabled = false;
-        }
+    status.textContent = "Ready — choose LEFT or RIGHT.";
+    step.textContent = "S.M.O.G. sequence will begin with the signal.";
+  }
 
-        function startSequence(direction) {
-            if (isRunning) return;
-            isRunning = true;
+  function runSequence(direction){
+    clearTimeout(sequenceTimer);
+    currentDirection = direction;
 
-            btnLeft.disabled = true;
-            btnRight.disabled = true;
+    leftBtn.classList.toggle("active", direction === "left");
+    rightBtn.classList.toggle("active", direction === "right");
 
-            // Step 1: Trigger the flashing triangle overlay first
-            flashOverlay.style.display = 'flex';
-            statusText.textContent = `Signaling ${direction.toUpperCase()}...`;
-            viewScreen.textContent = `[SIGNAL ACTIVE]`;
+    clearSceneClasses();
+    wheelSignal.className = "wheel-signal " + direction + " flash";
 
-            if (direction === 'left') {
-                leftTriangle.style.display = 'block';
-                leftTriangle.classList.add('flashing');
-            } else {
-                rightTriangle.style.display = 'block';
-                rightTriangle.classList.add('flashing');
-            }
+    const steps = sequence[direction];
+    let index = 0;
 
-            // Let it flash for 1.6 seconds (approx 4 rapid cycles)
-            const flashDuration = 1600;
+    function showNext(){
+      if(index >= steps.length){
+        status.textContent =
+          direction === "left"
+            ? "LEFT — OVER-SHOULDER CHECK COMPLETE"
+            : "RIGHT — OVER-SHOULDER CHECK COMPLETE";
 
-            let t1 = setTimeout(() => {
-                // Deactivate the flashing indicators completely
-                flashOverlay.style.display = 'none';
-                leftTriangle.classList.remove('flashing');
-                leftTriangle.style.display = 'none';
-                rightTriangle.classList.remove('flashing');
-                rightTriangle.style.display = 'none';
+        step.textContent =
+          "5. If clear and safe → GO.  Reset to demonstrate again.";
 
-                // Step 2: Begin Rearview Mirror Scan
-                rearviewMirror.classList.add('active');
-                viewScreen.textContent = "Checking Rearview Mirror...";
-                statusText.textContent = "S.M.O.G. Step 1: Rearview Mirror Scan";
-            }, flashDuration);
-            timeouts.push(t1);
+        return;
+      }
 
-            // Step 3: Side Mirror Scan
-            let t2 = setTimeout(() => {
-                rearviewMirror.classList.remove('active');
-                if (direction === 'left') {
-                    leftMirror.classList.add('active');
-                    viewScreen.textContent = "Checking Left Side Mirror...";
-                    statusText.textContent = "S.M.O.G. Step 2: Left Side Mirror Scan";
-                } else {
-                    rightMirror.classList.add('active');
-                    viewScreen.textContent = "Checking Right Side Mirror...";
-                    statusText.textContent = "S.M.O.G. Step 2: Right Side Mirror Scan";
-                }
-            }, flashDuration + 1500);
-            timeouts.push(t2);
+      clearSceneClasses();
+      scene.classList.add(steps[index].className);
 
-            // Step 4: Over-the-shoulder look
-            let t3 = setTimeout(() => {
-                leftMirror.classList.remove('active');
-                rightMirror.classList.remove('active');
-                
-                viewScreen.textContent = `Looking Over ${direction.toUpperCase()} Shoulder!`;
-                statusText.textContent = `S.M.O.G. Step 3: Over-the-Shoulder Blind Spot Check`;
-            }, flashDuration + 3000);
-            timeouts.push(t3);
+      status.textContent = steps[index].status;
+      step.textContent = steps[index].step;
 
-            // Complete state
-            let t4 = setTimeout(() => {
-                viewScreen.textContent = "Scan Complete. Safe to Merge.";
-                statusText.textContent = "Sequence complete. Click RESET to retry.";
-            }, flashDuration + 4500);
-            timeouts.push(t4);
-        }
+      index++;
 
-        // Button Event Listeners
-        btnLeft.addEventListener('click', () => startSequence('left'));
-        btnRight.addEventListener('click', () => startSequence('right'));
-        btnReset.addEventListener('click', resetDemo);
+      /*
+        Each movement stays on screen long enough for a student
+        to see where the driver's attention should go.
+      */
+      sequenceTimer = setTimeout(showNext, 2300);
+    }
 
-        // Keyboard Navigation Support
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                startSequence('left');
-            } else if (e.key === 'ArrowRight') {
-                startSequence('right');
-            } else if (e.key === ' ' || e.key === 'Spacebar') {
-                e.preventDefault(); // Stop page scrolling down
-                resetDemo();
-            }
-        });
-    </script>
+    showNext();
+  }
+
+  leftBtn.addEventListener("click", () => runSequence("left"));
+  rightBtn.addEventListener("click", () => runSequence("right"));
+  resetBtn.addEventListener("click", reset);
+
+  document.addEventListener("keydown", (event) => {
+    if(event.key === "ArrowLeft"){
+      event.preventDefault();
+      runSequence("left");
+    }
+
+    if(event.key === "ArrowRight"){
+      event.preventDefault();
+      runSequence("right");
+    }
+
+    if(event.code === "Space"){
+      event.preventDefault();
+      reset();
+    }
+  });
+</script>
 </body>
 </html>
