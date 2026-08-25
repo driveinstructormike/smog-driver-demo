@@ -67,12 +67,12 @@
     perspective:900px;
   }
 
-  .scene.left-rearview{ transform:translateX(8%) scale(1.85) rotateY(-2deg); }
-  .scene.left-side{ transform:translateX(-15%) scale(2.15) rotateY(-5deg); }
-  .scene.left-shoulder{ transform:translateX(-42%) scale(2.65) rotateY(-20deg); }
-  .scene.right-rearview{ transform:translateX(-8%) scale(1.85) rotateY(2deg); }
-  .scene.right-side{ transform:translateX(15%) scale(2.15) rotateY(5deg); }
-  .scene.right-shoulder{ transform:translateX(43%) scale(2.75) rotateY(22deg); }
+  .scene.left-rearview{ transform:translateX(26%) scale(2.15) rotateY(3deg); }
+  .scene.left-side{ transform:translateX(43%) scale(2.35) rotateY(5deg); }
+  .scene.left-shoulder{ transform:translateX(68%) scale(2.65) rotateY(18deg); }
+  .scene.right-rearview{ transform:translateX(-26%) scale(2.15) rotateY(-3deg); }
+  .scene.right-side{ transform:translateX(-43%) scale(2.35) rotateY(-5deg); }
+  .scene.right-shoulder{ transform:translateX(-68%) scale(2.65) rotateY(-18deg); }
 
   .sky{
     position:absolute;
@@ -302,6 +302,7 @@
     position:absolute;
     background:#171717;
     border-radius:8px;
+    z-index:1;
   }
 
   .wheel:before{
@@ -327,6 +328,7 @@
     border-radius:50%;
     background:#292929;
     border:5px solid #111;
+    z-index:5;
   }
   .wheel-signal{position:absolute;left:50%;top:50%;width:0;height:0;transform:translate(-50%,-50%);opacity:0;filter:drop-shadow(0 0 5px #ffd400);}
   .wheel-signal.left{border-top:12px solid transparent;border-bottom:12px solid transparent;border-right:22px solid #ffd400;}
