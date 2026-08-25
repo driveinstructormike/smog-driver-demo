@@ -64,11 +64,10 @@
     transform:translateX(0) rotateY(0deg) scale(1);
     transform-origin:center center;
     transition:transform 1200ms cubic-bezier(.18,.78,.2,1);
-    transition-delay: 1s; 
     perspective:900px;
   }
 
-  .scene.left-rearview{ transform:translateX(5%) translateY(55%) scale(2.05) rotateY(0deg); }
+  .scene.left-rearview{  transition-delay: 1s; transform:translateX(5%) translateY(55%) scale(2.05) rotateY(0deg); }
   .scene.left-side{ transform:translateX(80%) scale(2.45) rotateY(20deg); }
   .scene.left-shoulder{ transform:translateX(68%) scale(2.65) rotateY(90deg); }
   .scene.right-rearview{ transform:translateX(-5%) translateY(55%) scale(2.05) rotateY(0deg); }
