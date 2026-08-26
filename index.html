@@ -54,6 +54,8 @@
     border-radius:12px;
     background:#66727b;
     box-shadow:0 12px 40px #000;
+    <img id="blindspot-left" class="blindspot-overlay" src="Blindspot Check Left square.png" alt="Left Blindspot Check">
+    <img id="blindspot-right" class="blindspot-overlay" src="Blindspot Check Right square.png" alt="Right Blindspot Check">
   }
 
   /* The entire driver's-eye scene moves during the mirror / shoulder checks. */
@@ -74,6 +76,35 @@
   .scene.right-rearview{ transition-delay: 1.5s; transform:translateX(-5%) translateY(55%) scale(2.05) rotateY(0deg); }
   .scene.right-side{ transition-delay: 0.5s; transform:translateX(-80%) scale(2.45) rotateY(-20deg); }
   .scene.right-shoulder{ transform:translateX(-68%) scale(2.65) rotateY(-90deg); }
+
+  /* Container must have relative positioning if it doesn't already */
+.wrapper, .container {
+  position: relative;
+}
+
+/* Base style for both overlay images */
+.blindspot-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;          /* Ensures it floats cleanly above all moving elements */
+  max-width: 90%;        /* Keeps it responsive */
+  max-height: 90%;
+  pointer-events: none;  /* Allows clicks to pass through to underlying buttons */
+  
+  /* Smooth fade-in settings */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+/* Class applied via JS to trigger the appearance */
+.blindspot-overlay.reveal {
+  opacity: 1;
+  visibility: visible;
+}
+
 
   .sky{
     position:absolute;
@@ -655,5 +686,50 @@
     }
   });
 </script>
+
+<script>
+  // Elements
+  const leftShoulder = document.querySelector('.scene.left-shoulder');
+  const rightShoulder = document.querySelector('.scene.right-shoulder');
+  const imgLeft = document.getElementById('blindspot-left');
+  const imgRight = document.getElementById('blindspot-right');
+  
+  // Update selector if your reset button uses a different class or ID
+  const btnReset = document.querySelector('.reset-button') || document.getElementById('reset');
+
+  // Reveal Left Blindspot when shoulder transition finishes
+  if (leftShoulder) {
+    leftShoulder.addEventListener('transitionend', (e) => {
+      if (e.propertyName === 'transform') {
+        imgLeft.classList.add('reveal');
+      }
+    });
+  }
+
+  // Reveal Right Blindspot when shoulder transition finishes
+  if (rightShoulder) {
+    rightShoulder.addEventListener('transitionend', (e) => {
+      if (e.propertyName === 'transform') {
+        imgRight.classList.add('reveal');
+      }
+    });
+  }
+
+  // Clean overlays away during resets
+  if (btnReset) {
+    const handleReset = () => {
+      imgLeft.classList.remove('reveal');
+      imgRight.classList.remove('reveal');
+    };
+    btnReset.addEventListener('click', handleReset);
+    
+    // Optional: If you track spacebar for resets
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') handleReset();
+    });
+  }
+</script>
+
+  
 </body>
 </html>
