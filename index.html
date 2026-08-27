@@ -764,7 +764,16 @@ setTimeout(() => {
         Each movement stays on screen long enough for a student
         to see where the driver's attention should go.
       */
-      sequenceTimer = setTimeout(showNext, 3000);
+      let stepDelay = 2300;
+
+if(
+  steps[index - 1].className === "left-side" ||
+  steps[index - 1].className === "right-side"
+){
+  stepDelay = 3000;
+}
+
+sequenceTimer = setTimeout(showNext, stepDelay);
     }
 
     showNext();
