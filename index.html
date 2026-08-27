@@ -69,10 +69,10 @@
   }
 
   .scene.left-rearview{  transition-delay: 1.5s; transform:translateX(5%) translateY(55%) scale(2.05) rotateY(0deg); }
-  .scene.left-side{ transition-delay: 0.5s; transform:translateX(50%) scale(2.45) rotateY(20deg); }
+  .scene.left-side{ transition-delay: 0.5s; transform:translateX(55%) scale(2.45) rotateY(20deg); }
   .scene.left-shoulder{ transform:translateX(68%) scale(2.65) rotateY(90deg); }
   .scene.right-rearview{ transition-delay: 1.5s; transform:translateX(-5%) translateY(55%) scale(2.05) rotateY(0deg); }
-  .scene.right-side{ transition-delay: 0.5s; transform:translateX(-50%) scale(2.45) rotateY(-20deg); }
+  .scene.right-side{ transition-delay: 0.5s; transform:translateX(-55%) scale(2.45) rotateY(-20deg); }
   .scene.right-shoulder{ transform:translateX(-68%) scale(2.65) rotateY(-90deg); }
 
 /* Blind-spot check graphics */
@@ -80,7 +80,7 @@
   position:absolute;
   top:50%;
   left:50%;
-  width:min(34%,260px);
+  width:min(55%,420px);
   aspect-ratio:1;
   transform:translate(-50%,-50%);
   object-fit:contain;
@@ -94,11 +94,11 @@
 }
 
 .blindspot-check.left{
-  left:22%;
+  left:35%;
 }
 
 .blindspot-check.right{
-  left:78%;
+  left:65%;
 }
   
   .sky{
@@ -576,7 +576,7 @@
       {
         className: "left-rearview",
         status: "LEFT SIGNAL — CHECK REARVIEW MIRROR",
-        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+        step: "1. SIGNAL"
       },
       {
         className: "left-side",
@@ -594,7 +594,7 @@
       {
         className: "right-rearview",
         status: "RIGHT SIGNAL — CHECK REARVIEW MIRROR",
-        step: "1. SIGNAL → 2. Check REARVIEW mirror"
+        step: "1. SIGNAL"
       },
       {
         className: "right-side",
@@ -675,13 +675,31 @@ function hideBlindspotChecks(){
       clearSceneClasses();
         scene.classList.add(steps[index].className);
 
-        hideBlindspotChecks();
+hideBlindspotChecks();
 
-        status.textContent = steps[index].status;
-        step.textContent = steps[index].step;
+status.textContent = steps[index].status;
+step.textContent = steps[index].step;
 
-      /* Put the active sequence information in the header */
-      updateHeader(steps[index].step);
+/* Put the active sequence information in the header */
+updateHeader(steps[index].step);
+
+/* Once the view moves to the rearview mirror,
+   change the header from SIGNAL to CHECK REARVIEW MIRROR */
+if(steps[index].className === "left-rearview"){
+  setTimeout(() => {
+    if(currentDirection === "left"){
+      updateHeader("2. Check REARVIEW MIRROR");
+    }
+  }, 800);
+}
+
+if(steps[index].className === "right-rearview"){
+  setTimeout(() => {
+    if(currentDirection === "right"){
+      updateHeader("2. Check REARVIEW MIRROR");
+    }
+  }, 800);
+}
 
       /* Show the appropriate blind-spot graphic */
       if(steps[index].className === "left-shoulder"){
