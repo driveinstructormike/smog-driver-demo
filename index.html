@@ -54,8 +54,6 @@
     border-radius:12px;
     background:#66727b;
     box-shadow:0 12px 40px #000;
-    <img id="blindspot-left" class="blindspot-overlay" src="Blindspot Check Left square.png" alt="Left Blindspot Check">
-    <img id="blindspot-right" class="blindspot-overlay" src="Blindspot Check Right square.png" alt="Right Blindspot Check">
   }
 
   /* The entire driver's-eye scene moves during the mirror / shoulder checks. */
@@ -77,35 +75,32 @@
   .scene.right-side{ transition-delay: 0.5s; transform:translateX(-80%) scale(2.45) rotateY(-20deg); }
   .scene.right-shoulder{ transform:translateX(-68%) scale(2.65) rotateY(-90deg); }
 
-  /* Container must have relative positioning if it doesn't already */
-.wrapper, .container {
-  position: relative;
+/* Blind-spot check graphics */
+.blindspot-check{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:min(34%,260px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  z-index:30;
+  display:none;
+  pointer-events:none;
 }
 
-/* Base style for both overlay images */
-.blindspot-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 999;          /* Ensures it floats cleanly above all moving elements */
-  max-width: 90%;        /* Keeps it responsive */
-  max-height: 90%;
-  pointer-events: none;  /* Allows clicks to pass through to underlying buttons */
+.blindspot-check.visible{
+  display:block;
+}
+
+.blindspot-check.left{
+  left:22%;
+}
+
+.blindspot-check.right{
+  left:78%;
+}
   
-  /* Smooth fade-in settings */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-}
-
-/* Class applied via JS to trigger the appearance */
-.blindspot-overlay.reveal {
-  opacity: 1;
-  visibility: visible;
-}
-
-
   .sky{
     position:absolute;
     inset:0 0 42% 0;
@@ -463,7 +458,7 @@
 </head>
 
 <body>
-  <h1>S.M.O.G. — Driver's Seat Demonstration</h1>
+  <h1 id="demoHeader">S.M.O.G. — Driver's Seat Demonstration</h1>
   <p class="instructions">
     Activate a turn signal, then watch the driver's view move through
     <strong>Mirror → Side Mirror → Over the Shoulder</strong>.
@@ -520,6 +515,21 @@
 
 
       </div>
+
+      <!-- Blind-spot check graphics -->
+      <img
+        id="leftBlindspotCheck"
+        class="blindspot-check left"
+        src="Blindspot Check Left square.png"
+        alt="Left blind-spot check"
+      >
+
+      <img
+        id="rightBlindspotCheck"
+        class="blindspot-check right"
+        src="Blindspot Check Right square.png"
+        alt="Right blind-spot check"
+      >
     </div>
 
     <div class="controls">
@@ -554,6 +564,9 @@
   const status = document.getElementById("status");
   const step = document.getElementById("step");
   const wheelSignal = document.getElementById("wheelSignal");
+  const demoHeader = document.getElementById("demoHeader");
+  const leftBlindspotCheck = document.getElementById("leftBlindspotCheck");
+  const rightBlindspotCheck = document.getElementById("rightBlindspotCheck");
 
   let sequenceTimer = null;
   let currentDirection = null;
@@ -686,50 +699,5 @@
     }
   });
 </script>
-
-<script>
-  // Elements
-  const leftShoulder = document.querySelector('.scene.left-shoulder');
-  const rightShoulder = document.querySelector('.scene.right-shoulder');
-  const imgLeft = document.getElementById('blindspot-left');
-  const imgRight = document.getElementById('blindspot-right');
-  
-  // Update selector if your reset button uses a different class or ID
-  const btnReset = document.querySelector('.reset-button') || document.getElementById('reset');
-
-  // Reveal Left Blindspot when shoulder transition finishes
-  if (leftShoulder) {
-    leftShoulder.addEventListener('transitionend', (e) => {
-      if (e.propertyName === 'transform') {
-        imgLeft.classList.add('reveal');
-      }
-    });
-  }
-
-  // Reveal Right Blindspot when shoulder transition finishes
-  if (rightShoulder) {
-    rightShoulder.addEventListener('transitionend', (e) => {
-      if (e.propertyName === 'transform') {
-        imgRight.classList.add('reveal');
-      }
-    });
-  }
-
-  // Clean overlays away during resets
-  if (btnReset) {
-    const handleReset = () => {
-      imgLeft.classList.remove('reveal');
-      imgRight.classList.remove('reveal');
-    };
-    btnReset.addEventListener('click', handleReset);
-    
-    // Optional: If you track spacebar for resets
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') handleReset();
-    });
-  }
-</script>
-
-  
 </body>
 </html>
