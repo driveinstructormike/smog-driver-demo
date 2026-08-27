@@ -69,10 +69,10 @@
   }
 
   .scene.left-rearview{  transition-delay: 1.5s; transform:translateX(5%) translateY(55%) scale(2.05) rotateY(0deg); }
-  .scene.left-side{ transition-delay: 0.5s; transform:translateX(55%) scale(2.45) rotateY(20deg); }
+  .scene.left-side{ transition-delay: 1s; transform:translateX(55%) scale(2.45) rotateY(20deg); }
   .scene.left-shoulder{ transform:translateX(68%) scale(2.65) rotateY(90deg); }
   .scene.right-rearview{ transition-delay: 1.5s; transform:translateX(-5%) translateY(55%) scale(2.05) rotateY(0deg); }
-  .scene.right-side{ transition-delay: 0.5s; transform:translateX(-55%) scale(2.45) rotateY(-20deg); }
+  .scene.right-side{ transition-delay: 1s; transform:translateX(-55%) scale(2.45) rotateY(-20deg); }
   .scene.right-shoulder{ transform:translateX(-68%) scale(2.65) rotateY(-90deg); }
 
 /* Blind-spot check graphics */
@@ -672,34 +672,50 @@ function hideBlindspotChecks(){
         return;
       }
 
-      clearSceneClasses();
-        scene.classList.add(steps[index].className);
+            clearSceneClasses();
 
-hideBlindspotChecks();
+      /* The class is added here — this starts the pan/zoom */
+      scene.classList.add(steps[index].className);
 
-status.textContent = steps[index].status;
-step.textContent = steps[index].step;
+      hideBlindspotChecks();
 
-/* Put the active sequence information in the header */
-updateHeader(steps[index].step);
+      status.textContent = steps[index].status;
+      step.textContent = steps[index].step;
 
-/* Once the view moves to the rearview mirror,
-   change the header from SIGNAL to CHECK REARVIEW MIRROR */
-if(steps[index].className === "left-rearview"){
-  setTimeout(() => {
-    if(currentDirection === "left"){
-      updateHeader("2. Check REARVIEW MIRROR");
-    }
-  }, 800);
-}
+      /* Update the header when this movement begins */
+      if(steps[index].className === "left-rearview" ||
+         steps[index].className === "right-rearview"){
 
-if(steps[index].className === "right-rearview"){
-  setTimeout(() => {
-    if(currentDirection === "right"){
-      updateHeader("2. Check REARVIEW MIRROR");
-    }
-  }, 800);
-}
+        updateHeader("2. Check REARVIEW MIRROR");
+
+      }else if(steps[index].className === "left-side"){
+
+        updateHeader("3. Check LEFT SIDE MIRROR");
+
+      }else if(steps[index].className === "right-side"){
+
+        updateHeader("3. Check RIGHT SIDE MIRROR");
+
+      }else if(steps[index].className === "left-shoulder"){
+
+        updateHeader("4. Look OVER LEFT SHOULDER");
+
+      }else if(steps[index].className === "right-shoulder"){
+
+        updateHeader("4. Look OVER RIGHT SHOULDER");
+      }
+
+      /* Show the appropriate blind-spot graphic */
+      if(steps[index].className === "left-shoulder"){
+        leftBlindspotCheck.classList.add("visible");
+      }
+
+      if(steps[index].className === "right-shoulder"){
+        rightBlindspotCheck.classList.add("visible");
+      }
+
+      index++;
+
 
       /* Show the appropriate blind-spot graphic */
       if(steps[index].className === "left-shoulder"){
