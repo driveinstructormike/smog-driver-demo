@@ -609,6 +609,15 @@
     ]
   };
 
+  function updateHeader(text){
+  demoHeader.textContent = text;
+}
+
+function hideBlindspotChecks(){
+  leftBlindspotCheck.classList.remove("visible");
+  rightBlindspotCheck.classList.remove("visible");
+}
+  
   function clearSceneClasses(){
     scene.classList.remove(
       "left-rearview",
@@ -624,8 +633,11 @@
     clearTimeout(sequenceTimer);
     sequenceTimer = null;
     currentDirection = null;
-    clearSceneClasses();
+   clearSceneClasses();
     wheelSignal.className = "wheel-signal";
+    hideBlindspotChecks();
+
+    updateHeader("S.M.O.G. — Driver's Seat Demonstration");
 
     leftBtn.classList.remove("active");
     rightBtn.classList.remove("active");
@@ -661,12 +673,26 @@
       }
 
       clearSceneClasses();
-      scene.classList.add(steps[index].className);
+        scene.classList.add(steps[index].className);
 
-      status.textContent = steps[index].status;
-      step.textContent = steps[index].step;
+        hideBlindspotChecks();
 
-      index++;
+        status.textContent = steps[index].status;
+        step.textContent = steps[index].step;
+
+      /* Put the active sequence information in the header */
+      updateHeader(steps[index].step);
+
+      /* Show the appropriate blind-spot graphic */
+      if(steps[index].className === "left-shoulder"){
+        leftBlindspotCheck.classList.add("visible");
+}
+
+      if(steps[index].className === "right-shoulder"){
+        rightBlindspotCheck.classList.add("visible");
+}
+
+index++;
 
       /*
         Each movement stays on screen long enough for a student
