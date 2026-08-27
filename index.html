@@ -674,36 +674,78 @@ function hideBlindspotChecks(){
 
             clearSceneClasses();
 
-      /* The class is added here — this starts the pan/zoom */
-      scene.classList.add(steps[index].className);
+/* The class is added here — this schedules the pan/zoom */
+scene.classList.add(steps[index].className);
 
-      hideBlindspotChecks();
+hideBlindspotChecks();
 
-      status.textContent = steps[index].status;
-      step.textContent = steps[index].step;
+status.textContent = steps[index].status;
+step.textContent = steps[index].step;
 
-      /* Update the header when this movement begins */
-      if(steps[index].className === "left-rearview" ||
-         steps[index].className === "right-rearview"){
 
-        updateHeader("2. Check REARVIEW MIRROR");
+/*-----------------------------------------
+  UPDATE HEADER WHEN PAN/ZOOM ACTUALLY STARTS
+-----------------------------------------*/
 
-      }else if(steps[index].className === "left-side"){
+const movementClass = steps[index].className;
 
-        updateHeader("3. Check LEFT SIDE MIRROR");
+let headerDelay = 0;
 
-      }else if(steps[index].className === "right-side"){
+if(
+  movementClass === "left-rearview" ||
+  movementClass === "right-rearview"
+){
+  headerDelay = 1500;
 
-        updateHeader("3. Check RIGHT SIDE MIRROR");
+}else if(
+  movementClass === "left-side" ||
+  movementClass === "right-side"
+){
+  headerDelay = 1000;
+}
 
-      }else if(steps[index].className === "left-shoulder"){
 
-        updateHeader("4. Look OVER LEFT SHOULDER");
+setTimeout(() => {
 
-      }else if(steps[index].className === "right-shoulder"){
+  /* Make sure this movement is still the active one */
+  if(currentDirection !== direction){
+    return;
+  }
 
-        updateHeader("4. Look OVER RIGHT SHOULDER");
-      }
+  if(
+    movementClass === "left-rearview" ||
+    movementClass === "right-rearview"
+  ){
+
+    updateHeader("2. Check REARVIEW MIRROR");
+
+  }else if(
+    movementClass === "left-side"
+  ){
+
+    updateHeader("3. Check LEFT SIDE MIRROR");
+
+  }else if(
+    movementClass === "right-side"
+  ){
+
+    updateHeader("3. Check RIGHT SIDE MIRROR");
+
+  }else if(
+    movementClass === "left-shoulder"
+  ){
+
+    updateHeader("4. Look OVER LEFT SHOULDER");
+
+  }else if(
+    movementClass === "right-shoulder"
+  ){
+
+    updateHeader("4. Look OVER RIGHT SHOULDER");
+
+  }
+
+}, headerDelay);
 
       /* Show the appropriate blind-spot graphic */
       if(steps[index].className === "left-shoulder"){
